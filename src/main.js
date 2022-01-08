@@ -36,6 +36,8 @@ Vue.use(ElementUI, { locale })
 Vue.config.productionTip = false
 
 import API from '@/api'
+import CategorySelector from '@/components/CategorySelector'
+Vue.component(CategorySelector.name,CategorySelector)//引入并注册全局为全局组件
 Vue.prototype.$API=API
 new Vue({
   el: '#app',
