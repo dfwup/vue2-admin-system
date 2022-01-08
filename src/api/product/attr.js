@@ -22,3 +22,11 @@ export const reqAttrInfoList=(category1Id,category2Id,category3Id)=>request({
     method:'get'
 })
 
+//添加属性名与属性值接口    POST /admin/product/saveAttrInfo    参数{}
+export const reqAddOrUpdateAttrInfo=(data)=>request({
+    url:'/admin/product/saveAttrInfo ',
+    method:'post',
+    data
+})
+
+
