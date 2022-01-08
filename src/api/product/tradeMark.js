@@ -24,3 +24,9 @@ export const reqAddOrUpdateTradMark = (tradeMark) => {
         })
     }
 }
+//删除品牌接口  DELETE   /admin/product/baseTrademark/remove/{id}   参数id
+
+export const reqDeleteTradeMark=(id)=>request({
+    url:`/admin/product/baseTrademark/remove/${id}`,
+    method:'delete'
+})

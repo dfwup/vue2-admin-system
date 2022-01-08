@@ -14,15 +14,16 @@
       :visible.sync="dialogFormVisible"
       :data="tradeMarkList"
     >
-      <el-form style="width: 80%" :model="tmForm">
-        <el-form-item label="品牌名称" label-width="100px">
+      <el-form style="width: 80%" :model="tmForm" :rules="rules" ref="ruleForm">
+        <el-form-item label="品牌名称" label-width="100px" prop="tmName">
           <el-input autocomplete="off" v-model="tmForm.tmName"></el-input>
         </el-form-item>
-        <el-form-item label="品牌LOGO" label-width="100px">
+        <el-form-item label="品牌LOGO" label-width="100px" prop="logoUrl">
           <!-- 不是表单元素，不能用v-model
           action:设置图片上传地址
           on-success监测图片是否上传成功
           before-upload上传图片之前
+
            -->
           <el-upload
             class="avatar-uploader"
@@ -68,7 +69,11 @@
             @click="updateTradeMark(row)"
             >修改</el-button
           >
-          <el-button type="danger" size="mini" icon="el-icon-delete"
+          <el-button
+            type="danger"
+            size="mini"
+            icon="el-icon-delete"
+            @click="deleteTradeMark(row)"
             >删除</el-button
           >
         </template>
@@ -94,6 +99,14 @@
 <script>
 export default {
   data() {
+    //自定义验证规则
+    var validateTmName = (rule, value, callback) => {
+      if (value.length < 2 || value.length > 10) {
+        callback(new Error("品牌名称需要2-10位数"));
+      }
+      callback();
+    };
+
     return {
       page: 1,
       limit: 5,
@@ -106,6 +119,15 @@ export default {
       tmForm: {
         tmName: "",
         logoUrl: "",
+      },
+      rules: {
+        //品牌名称验证规则
+        tmName: [
+          { required: true, message: "请输入品牌名称", trigger: "blur" },
+          { validator: validateTmName, trigger: "change" },
+        ],
+
+        logoUrl: [{ required: true, message: "请选择图片" }],
       },
     };
   },
@@ -154,6 +176,38 @@ export default {
       // this.tmForm=row
       this.tmForm = { ...row };
     },
+    //删除按钮
+    deleteTradeMark(row) {
+      console.log(row);
+      //删除确认弹框
+      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async () => {
+          //确认
+          let result = await this.$API.tradeMark.reqDeleteTradeMark(row.id);
+          console.log(result);
+          if (result.code == 200) {
+            this.$message({
+              type: "success",
+              message: "删除成功!",
+            });
+            this.getPageList(
+              this.tradeMarkList.length > 1 ? this.page : this.page - 1
+            );
+            return "ok";
+          }
+        })
+        .catch(() => {
+          //取消
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    },
     //上传成功
     handleAvatarSuccess(res, file) {
       // console.log(res,file);//res上传成功后，返回
@@ -173,21 +227,29 @@ export default {
     },
     //确认按钮
     async addOrUpdateTradeMark(tmForm) {
-      this.dialogFormVisible = false;
-      let result = await this.$API.tradeMark.reqAddOrUpdateTradMark(
-        this.tmForm
-      );
-      if (result.code == 200) {
-        //弹出提示消息
-        // this.$message(this.tmForm.id ? "修改成功" : "添加成功");
-        this.$message({
-          type: "success",
-          message: this.tmForm.id ? "修改成功" : "添加成功",
-        });
-        //请求新的列表
-        this.getPageList(this.tmForm.id?this.page:1);
-        return "ok";
-      }
+      //表单验证
+      this.$refs.ruleForm.validate(async (valid) => {
+        if (valid) {
+          this.dialogFormVisible = false;
+          let result = await this.$API.tradeMark.reqAddOrUpdateTradMark(
+            this.tmForm
+          );
+          if (result.code == 200) {
+            //弹出提示消息
+            // this.$message(this.tmForm.id ? "修改成功" : "添加成功");
+            this.$message({
+              type: "success",
+              message: this.tmForm.id ? "修改成功" : "添加成功",
+            });
+            //请求新的列表
+            this.getPageList(this.tmForm.id ? this.page : 1);
+            return "ok";
+          }
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
     },
   },
 };
