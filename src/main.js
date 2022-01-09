@@ -37,8 +37,11 @@ Vue.config.productionTip = false
 
 import API from '@/api'
 import CategorySelector from '@/components/CategorySelector'
+import HintButton from '@/components/HintButton'
 Vue.component(CategorySelector.name,CategorySelector)//引入并注册全局为全局组件
 Vue.prototype.$API=API
+Vue.component(HintButton.name,HintButton)
+
 new Vue({
   el: '#app',
   router,

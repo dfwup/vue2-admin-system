@@ -130,6 +130,7 @@
 <script>
 import cloneDeep from "lodash/cloneDeep";
 export default {
+  name:'Attr',
   data() {
     return {
       category1Id: "",

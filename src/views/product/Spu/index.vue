@@ -8,7 +8,7 @@
       <!-- 第一种展示spu列表 -->
       <div>
         <el-button type="primary" icon="el-icon-plus">添加SPU</el-button>
-        <el-table style="width: 100%" border="">
+        <el-table style="width: 100%" border="" :data="records">
           <el-table-column
             type="index"
             label="序号"
@@ -16,38 +16,42 @@
             align="center"
           ></el-table-column>
           <el-table-column
-            prop="prop"
+            prop="spuName"
             label="SPU名称"
             width="width"
           ></el-table-column>
           <el-table-column
-            prop="prop"
+            prop="description"
             label="SPU描述"
             width="width"
           ></el-table-column>
           <el-table-column prop="prop" label="操作" width="width">
             <template slot-scope="{ row, $index }">
               <!-- 占位，将来换成hint -->
-              <el-button
+              <hint-button
                 type="success"
                 icon="el-icon-plus"
                 size="mini"
-              ></el-button>
-              <el-button
+                title="添加SPU"
+              ></hint-button>
+              <hint-button
                 type="warning"
                 icon="el-icon-edit"
                 size="mini"
-              ></el-button>
-              <el-button
+                title="修改SPU"
+              ></hint-button>
+              <hint-button
                 type="info"
                 icon="el-icon-info"
                 size="mini"
-              ></el-button>
-              <el-button
+                title="查看当前SPU的全部SKU列表"
+              ></hint-button>
+              <hint-button
                 type="danger"
                 icon="el-icon-delete"
                 size="mini"
-              ></el-button>
+                title="删除SPU"
+              ></hint-button>
             </template>
           </el-table-column>
         </el-table>
@@ -56,11 +60,13 @@
            @current-change="handleCurrentChange"
            -->
         <el-pagination
-          :current-page="6"
+          @size-change="handleSizeChange"
+          @current-change="getSpuList"
+          :current-page="page"
           :page-sizes="[3, 5, 7]"
-          :page-size="3"
+          :page-size="limit"
           layout="prev, pager, next, jumper,->,total, sizes"
-          :total="30"
+          :total="total"
           style="text-align: center"
         >
         </el-pagination>
@@ -71,12 +77,17 @@
 
 <script>
 export default {
+  name: "Spu",
   data() {
     return {
       category1Id: "",
       category2Id: "",
       category3Id: "",
       show: true, //控制三级联动的可操作性
+      page: 1, //当前页数
+      limit: 3, //每页展示数据
+      records: [], //存储spu列表
+      total: 0, //数据个数
     };
   },
   methods: {
@@ -99,7 +110,28 @@ export default {
       }
     },
     //获取spu数据
-    getSpuList() {},
+    async getSpuList(pager = 1) {
+      this.page = pager;
+      //需要携带三个参数
+      const { page, limit, category3Id } = this;
+      let result = await this.$API.spu.reqSpuList(page, limit, category3Id);
+      // console.log(result);
+      if (result.code == 200) {
+        this.records = result.data.records;
+        this.total = result.data.total;
+      }
+    },
+    //分页器切换页面,可以优化到getSpuList
+    // handleCurrentChange(page) {
+    //   this.page=page
+    //   this.getSpuList()
+    // },
+    //修改每页展示数据个数
+    handleSizeChange(limit) {
+      console.log(limit);
+      this.limit = limit;
+      this.getSpuList();
+    },
   },
 };
 </script>

@@ -98,6 +98,7 @@
 
 <script>
 export default {
+  name: "tradeMark",
   data() {
     //自定义验证规则
     var validateTmName = (rule, value, callback) => {
