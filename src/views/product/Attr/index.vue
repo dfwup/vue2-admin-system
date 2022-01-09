@@ -2,7 +2,7 @@
   <div>
     <!-- 三级联动 -->
     <el-card style="margin: 20px 0">
-      <CategorySelector @getCategoryId="getCategoryId" />
+      <CategorySelector @getCategoryId="getCategoryId" :isShow="!isShowTable" />
     </el-card>
     <!-- 表格数据展示 -->
     <el-card>
@@ -120,7 +120,7 @@
           </el-table-column>
         </el-table>
 
-        <el-button type="primary" @click="addOrUpdateAttr">保存</el-button>
+        <el-button type="primary" @click="addOrUpdateAttr" :disabled="attrInfo.attrValueList.length<1">保存</el-button>
         <el-button @click="isShowTable = true">取消</el-button>
       </div>
     </el-card>
@@ -272,14 +272,12 @@ export default {
       try {
         await this.$API.attr.reqAddOrUpdateAttrInfo(this.attrInfo);
         this.$message({
-          type:'success',
-          message:'保存成功'
-        })
+          type: "success",
+          message: "保存成功",
+        });
         this.isShowTable = true;
-        this.getAttrInfoList()
-      } catch (error) {
-
-      }
+        this.getAttrInfoList();
+      } catch (error) {}
     },
   },
 };
