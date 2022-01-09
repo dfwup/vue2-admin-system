@@ -5,9 +5,15 @@
     </el-card>
     <el-card>
       <!-- 三种状态切换 -->
-      <!-- 第一种展示spu列表 -->
-      <div>
-        <el-button type="primary" icon="el-icon-plus">添加SPU</el-button>
+      <!-- spu列表 -->
+      <div v-show="scence == 0">
+        <el-button
+          type="primary"
+          icon="el-icon-plus"
+          :disabled="!category3Id"
+          @click="addSpu"
+          >添加SPU</el-button
+        >
         <el-table style="width: 100%" border="" :data="records">
           <el-table-column
             type="index"
@@ -26,6 +32,7 @@
             width="width"
           ></el-table-column>
           <el-table-column prop="prop" label="操作" width="width">
+            <!-- 插槽实现按钮 -->
             <template slot-scope="{ row, $index }">
               <!-- 占位，将来换成hint -->
               <hint-button
@@ -39,6 +46,7 @@
                 icon="el-icon-edit"
                 size="mini"
                 title="修改SPU"
+                @click="updateSpu(row)"
               ></hint-button>
               <hint-button
                 type="info"
@@ -71,13 +79,24 @@
         >
         </el-pagination>
       </div>
+      <!-- 页面较复杂，拆成子组件 -->
+      <!-- 添加/修改spu -->
+      <SpuForm v-show="scence == 1" />
+      <!-- 添加sku -->
+      <SpuForm v-show="scence == 2" />
     </el-card>
   </div>
 </template>
 
 <script>
+import SkuForm from "./SkuForm";
+import SpuForm from "./SpuForm";
 export default {
   name: "Spu",
+  components: {
+    SkuForm,
+    SpuForm,
+  },
   data() {
     return {
       category1Id: "",
@@ -88,6 +107,7 @@ export default {
       limit: 3, //每页展示数据
       records: [], //存储spu列表
       total: 0, //数据个数
+      scence: 0, //0展示spu  1添加/修改spu   2添加sku   data中的响应式数据
     };
   },
   methods: {
@@ -131,6 +151,14 @@ export default {
       console.log(limit);
       this.limit = limit;
       this.getSpuList();
+    },
+    //添加spu
+    addSpu() {
+      this.scence = 1;
+    },
+    //修改spu
+    updateSpu(row) {
+      this.scence = 1;
     },
   },
 };
