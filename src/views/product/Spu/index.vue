@@ -6,7 +6,7 @@
     <el-card>
       <!-- 三种状态切换 -->
       <!-- spu列表 -->
-      <div v-show="scence == 0">
+      <div v-show="scene == 0">
         <el-button
           type="primary"
           icon="el-icon-plus"
@@ -81,9 +81,9 @@
       </div>
       <!-- 页面较复杂，拆成子组件 -->
       <!-- 添加/修改spu -->
-      <SpuForm v-show="scence == 1" />
+      <SpuForm v-show="scene == 1" @changeScene="changeScene" ref="spu" />
       <!-- 添加sku -->
-      <SpuForm v-show="scence == 2" />
+      <SkuForm v-show="scene == 2" />
     </el-card>
   </div>
 </template>
@@ -107,7 +107,7 @@ export default {
       limit: 3, //每页展示数据
       records: [], //存储spu列表
       total: 0, //数据个数
-      scence: 0, //0展示spu  1添加/修改spu   2添加sku   data中的响应式数据
+      scene: 0, //0展示spu  1添加/修改spu   2添加sku   data中的响应式数据
     };
   },
   methods: {
@@ -154,11 +154,19 @@ export default {
     },
     //添加spu
     addSpu() {
-      this.scence = 1;
+      this.scene = 1;
     },
     //修改spu
     updateSpu(row) {
-      this.scence = 1;
+      this.scene = 1;
+      //通过ref获取子组件spuForm,调用其中的方法
+      //
+      this.$refs.spu.initSpuForm(row)
+      // console.log(this.$refs.spu);
+    },
+    //自定义事件
+    changeScene(scene) {
+      this.scene = scene;
     },
   },
 };
