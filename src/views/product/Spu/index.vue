@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card style="margin: 20px 0">
-      <CategorySelector @getCategoryId="getCategoryId" :isShow="!show" />
+      <CategorySelector @getCategoryId="getCategoryId" :isShow="scene!=0" />
     </el-card>
     <el-card>
       <!-- 三种状态切换 -->
@@ -102,7 +102,7 @@ export default {
       category1Id: "",
       category2Id: "",
       category3Id: "",
-      show: true, //控制三级联动的可操作性
+      isShow: true, //控制三级联动的可操作性
       page: 1, //当前页数
       limit: 3, //每页展示数据
       records: [], //存储spu列表

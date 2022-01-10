@@ -71,10 +71,10 @@
             <template slot-scope="{ row, $index }">
               <el-tag
                 :key="tag.id"
-                v-for="tag in row.spuSaleAttrValueList"
+                v-for="(tag, index) in row.spuSaleAttrValueList"
                 closable
                 :disable-transitions="false"
-                @close="handleClose(tag)"
+                @close="handleClose(index, row)"
               >
                 {{ tag.saleAttrValueName }}
               </el-tag>
@@ -100,7 +100,10 @@
           <el-table-column prop="prop" label="操作" width="80">
             <!--popconfirm -->
             <template slot-scope="{ row, $index }">
-              <el-popconfirm title="这是一段内容确定删除吗？">
+              <el-popconfirm
+                :title="`确定要删除${row.saleAttrName}属性?`"
+                @onConfirm="deleteSaleAttr(row,$index)"
+              >
                 <el-button
                   slot="reference"
                   icon="el-icon-delete"
@@ -167,9 +170,10 @@ export default {
     };
   },
   methods: {
-    //关闭预览
-    handleClose(tag) {
-      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+    //删除tag
+    handleClose(index, row) {
+      console.log(index, row);
+      row.spuSaleAttrValueList.splice(index, 1);
     },
     //input失去焦点时添加属性值
     handleInputConfirm(row) {
@@ -183,12 +187,12 @@ export default {
       }
       //判断输入的数据是否重复
       let result = row.spuSaleAttrValueList.some((item) => {
-        return  item.saleAttrValueName == inputValue;
+        return item.saleAttrValueName == inputValue;
       });
-      console.log(result);
+      // console.log(result);
       if (result) {
-        this.$message('属性值不能重复')
-        return
+        this.$message("属性值不能重复");
+        return;
       }
 
       //判断数据是否合法之后，再新增
@@ -218,6 +222,11 @@ export default {
       this.spu.spuSaleAttrList.push(newSaleAttr);
       //清空数据
       this.attrIdAndAttrName = "";
+    },
+    //删除属性
+    deleteSaleAttr(index) {
+      // console.log(row,index);
+      this.spu.spuSaleAttrList.splice(index,1)
     },
 
     //删除图片
