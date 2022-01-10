@@ -25,9 +25,9 @@ export const reqGetSpuImageList=(spuId)=>request({
     method:'get'
 })
 
-//获取平台中全部的销售属性（3个） GET /admin/product/spuSaleAttrList/{spuId} 参数：spuId
-export const reqGetSpuSaleAttrList=(spuId)=>request({
-    url:`/admin/product/spuSaleAttrList/${spuId}`,
+//获取平台中全部的销售属性（3个） GET /admin/product/baseSaleAttrList   无参数
+export const reqGetBaseSaleAttrList=()=>request({
+    url:'/admin/product/baseSaleAttrList',
     method:'get'
 })
 
