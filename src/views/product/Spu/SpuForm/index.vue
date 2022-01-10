@@ -30,6 +30,7 @@
           :file-list="spuImageList"
           :on-preview="handlePictureCardPreview"
           :on-remove="handleRemove"
+          :on-success="handleSuccess"
         >
           <i class="el-icon-plus"></i>
         </el-upload>
@@ -45,11 +46,17 @@
           <el-option
             :label="unSelectSaleAttr.name"
             :value="`${unSelectSaleAttr.id}:${unSelectSaleAttr.name}`"
-            v-for="(unSelectSaleAttr,index) in unSelectSaleAttrList"
+            v-for="(unSelectSaleAttr, index) in unSelectSaleAttrList"
             :key="unSelectSaleAttr.id"
           ></el-option>
         </el-select>
-        <el-button type="primary" icon="el-icon-plus">添加销售属性</el-button>
+        <el-button
+          type="primary"
+          icon="el-icon-plus"
+          @click="addSaleAttr"
+          :disabled="unSelectSaleAttrList.length < 1"
+          >添加销售属性</el-button
+        >
         <el-table border style="width: 100%" :data="spu.spuSaleAttrList">
           <el-table-column
             type="index"
@@ -71,22 +78,21 @@
               >
                 {{ tag.saleAttrValueName }}
               </el-tag>
-              <!-- inputVisible暂时放在data中 -->
+
               <el-input
                 class="input-new-tag"
-                v-if="inputVisible"
-                v-model="inputValue"
+                v-if="row.inputVisible"
+                v-model="row.inputValue"
                 ref="saveTagInput"
                 size="small"
-                @keyup.enter.native="handleInputConfirm"
-                @blur="handleInputConfirm"
+                @blur="handleInputConfirm(row)"
               >
               </el-input>
               <el-button
                 v-else
                 class="button-new-tag"
                 size="small"
-                @click="showInput"
+                @click="addSaleAttrValue(row)"
                 >+添加</el-button
               >
             </template>
@@ -122,8 +128,6 @@ export default {
       attrIdAndAttrName: "", //收集未选择的销售属性的id
       dialogImageUrl: "",
       dialogVisible: false,
-      inputVisible: false,
-      inputValue: "",
       // spuInfo: {}, //初始化是一个空对象
       spu: {
         category3Id: 0,
@@ -163,34 +167,75 @@ export default {
     };
   },
   methods: {
+    //关闭预览
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
     },
-
-    showInput() {
-      this.inputVisible = true;
-      this.$nextTick((_) => {
-        this.$refs.saveTagInput.$refs.input.focus();
-      });
-    },
-
-    handleInputConfirm() {
-      let inputValue = this.inputValue;
-      if (inputValue) {
-        this.dynamicTags.push(inputValue);
+    //input失去焦点时添加属性值
+    handleInputConfirm(row) {
+      console.log(row);
+      //解构出收集的数据
+      const { baseSaleAttrId, inputValue } = row;
+      //判断输入的数据是否为空
+      if (inputValue.trim() == "") {
+        this.$message("属性值不能为空");
+        return;
       }
-      this.inputVisible = false;
-      this.inputValue = "";
+      //判断输入的数据是否重复
+      let result = row.spuSaleAttrValueList.some((item) => {
+        return  item.saleAttrValueName == inputValue;
+      });
+      console.log(result);
+      if (result) {
+        this.$message('属性值不能重复')
+        return
+      }
+
+      //判断数据是否合法之后，再新增
+      //将输入的数据整理成相应的格式
+      let newSaleAttrValue = {
+        baseSaleAttrId,
+        saleAttrValueName: inputValue,
+      };
+      //添加到属性值列表中
+      row.spuSaleAttrValueList.push(newSaleAttrValue);
+
+      row.inputVisible = false;
+    },
+    //添加属性值
+    addSaleAttrValue(row) {
+      this.$set(row, "inputVisible", true);
+      this.$set(row, "inputValue", "");
+    },
+    //添加属性
+    addSaleAttr() {
+      const [baseSaleAttrId, saleAttrName] = this.attrIdAndAttrName.split(":");
+      let newSaleAttr = {
+        baseSaleAttrId,
+        saleAttrName,
+        spuSaleAttrValueList: [],
+      };
+      this.spu.spuSaleAttrList.push(newSaleAttr);
+      //清空数据
+      this.attrIdAndAttrName = "";
     },
 
     //删除图片
     handleRemove(file, fileList) {
-      console.log(file, fileList);
+      // console.log("删除图片");
+      // console.log(file, fileList);
+      this.spuImageList = fileList;
     },
     //预览图片
     handlePictureCardPreview(file) {
+      // console.log("预览照片", file.url);
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
+    },
+    //上传图片成功时
+    handleSuccess(response, file, fileList) {
+      // console.log("上传成功", response, file, fileList);
+      this.spuImageList = fileList;
     },
     //初始化spuForm数据
     async initSpuForm(spu) {
