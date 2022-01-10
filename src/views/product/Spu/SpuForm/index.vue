@@ -102,7 +102,7 @@
             <template slot-scope="{ row, $index }">
               <el-popconfirm
                 :title="`确定要删除${row.saleAttrName}属性?`"
-                @onConfirm="deleteSaleAttr(row,$index)"
+                @onConfirm="deleteSaleAttr(row, $index)"
               >
                 <el-button
                   slot="reference"
@@ -116,8 +116,8 @@
         </el-table>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary">保存</el-button>
-        <el-button @click="$emit('changeScene', 0)">取消</el-button>
+        <el-button type="primary" @click="addOrUpdateSpu">保存</el-button>
+        <el-button @click="cancel">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -137,14 +137,7 @@ export default {
         tmId: 0,
         description: "",
         spuName: "",
-        spuImageList: [
-          {
-            id: 0,
-            imgName: "",
-            imgUrl: "",
-            spuId: 0,
-          },
-        ],
+        spuImageList: [],
         spuSaleAttrList: [
           {
             baseSaleAttrId: 0,
@@ -172,12 +165,12 @@ export default {
   methods: {
     //删除tag
     handleClose(index, row) {
-      console.log(index, row);
+      // console.log(index, row);
       row.spuSaleAttrValueList.splice(index, 1);
     },
     //input失去焦点时添加属性值
     handleInputConfirm(row) {
-      console.log(row);
+      // console.log(row);
       //解构出收集的数据
       const { baseSaleAttrId, inputValue } = row;
       //判断输入的数据是否为空
@@ -226,7 +219,7 @@ export default {
     //删除属性
     deleteSaleAttr(index) {
       // console.log(row,index);
-      this.spu.spuSaleAttrList.splice(index,1)
+      this.spu.spuSaleAttrList.splice(index, 1);
     },
 
     //删除图片
@@ -276,6 +269,40 @@ export default {
       if (saleResult.code == 200) {
         this.baseSaleAttrList = saleResult.data;
       }
+    },
+    //保存
+    async addOrUpdateSpu() {
+      //整理参数：需要整理照片墙的数据
+      //携带参数：对于图片，需要携带imageName与imageUrl字段
+      this.spu.spuImageList = this.spuImageList.map((item) => {
+        return {
+          imageName: item.name,
+          imageUrl: (item.response && item.response.data) || item.url,
+        };
+      });
+      //发请求
+      let result = await this.$API.spu.reqAddOrUpdateSpu(this.spu);
+      if (result.code == 200) {
+        //提示
+        this.$message({ type: "success", message: "保存成功" });
+        //通知父组件回到场景0
+        this.$emit("changeScene", {
+          scene: 0,
+          flag: this.spu.id ? "修改" : "添加",
+        });
+      }
+      //清除数据
+      Object.assign(this._data, this.$options.data());
+    },
+    //取消按钮
+    cancel() {
+      //取消按钮的回调，通知父亲切换场景为0
+      this.$emit("changeScene", { scene: 0, flag: "" });
+      //清理数据
+      //Object.assign:es6中新增的方法可以合并对象
+      //组件实例this._data,可以操作data当中响应式数据
+      //this.$options可以获取配置对象，配置对象的data函数执行，返回的响应式数据为空的
+      Object.assign(this._data, this.$options.data());
     },
   },
   computed: {

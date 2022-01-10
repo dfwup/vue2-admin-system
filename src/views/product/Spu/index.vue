@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card style="margin: 20px 0">
-      <CategorySelector @getCategoryId="getCategoryId" :isShow="scene!=0" />
+      <CategorySelector @getCategoryId="getCategoryId" :isShow="scene != 0" />
     </el-card>
     <el-card>
       <!-- 三种状态切换 -->
@@ -161,12 +161,20 @@ export default {
       this.scene = 1;
       //通过ref获取子组件spuForm,调用其中的方法
       //
-      this.$refs.spu.initSpuForm(row)
+      this.$refs.spu.initSpuForm(row);
       // console.log(this.$refs.spu);
     },
     //自定义事件
-    changeScene(scene) {
+    changeScene({ scene, flag }) {
+      //flag这个形参为了区分保存按钮是添加还是修改
+      //切换结构（场景）
       this.scene = scene;
+      //子组件通知父组件切换场景，需要再次获取SPU列表的数据进行展示
+      if (flag == "修改") {
+        this.getSpuList(this.page);
+      } else {
+        this.getSpuList();
+      }
     },
   },
 };
