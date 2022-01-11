@@ -179,7 +179,7 @@ export default {
     },
     //删除按钮
     deleteTradeMark(row) {
-      console.log(row);
+      // console.log(row);
       //删除确认弹框
       this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -189,7 +189,7 @@ export default {
         .then(async () => {
           //确认
           let result = await this.$API.tradeMark.reqDeleteTradeMark(row.id);
-          console.log(result);
+          // console.log(result);
           if (result.code == 200) {
             this.$message({
               type: "success",

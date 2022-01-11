@@ -39,7 +39,7 @@
                 type="success"
                 icon="el-icon-plus"
                 size="mini"
-                title="添加SPU"
+                title="添加SKU"
               ></hint-button>
               <hint-button
                 type="warning"
@@ -59,6 +59,7 @@
                 icon="el-icon-delete"
                 size="mini"
                 title="删除SPU"
+                @click="deleteSpu(row)"
               ></hint-button>
             </template>
           </el-table-column>
@@ -155,6 +156,16 @@ export default {
     //添加spu
     addSpu() {
       this.scene = 1;
+      this.$refs.spu.addSpuData(this.category3Id);
+    },
+    //删除spu
+    async deleteSpu(row) {
+      let result = await this.$API.spu.reqDeleteSpu(row.id);
+      // console.log(result);//data null
+      if (result.code == 200) {
+        this.$message("删除spu成功");
+        this.getSpuList(this.records.length > 1 ? this.page : this.page - 1);
+      }
     },
     //修改spu
     updateSpu(row) {
@@ -164,6 +175,7 @@ export default {
       this.$refs.spu.initSpuForm(row);
       // console.log(this.$refs.spu);
     },
+
     //自定义事件
     changeScene({ scene, flag }) {
       //flag这个形参为了区分保存按钮是添加还是修改

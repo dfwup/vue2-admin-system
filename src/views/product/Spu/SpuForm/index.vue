@@ -5,8 +5,9 @@
         <el-input placeholder="SPU名称" v-model="spu.spuName"></el-input>
       </el-form-item>
       <el-form-item label="品牌">
-        <el-select placeholder="请选择品牌" v-model="spu.tmId">
+        <el-select v-model="spu.tmId"  placeholder="请选择品牌">
           <el-option
+           
             :label="tradeMark.tmName"
             :value="tradeMark.id"
             v-for="(tradeMark, index) in tradeMarkList"
@@ -131,30 +132,14 @@ export default {
       attrIdAndAttrName: "", //收集未选择的销售属性的id
       dialogImageUrl: "",
       dialogVisible: false,
-      // spuInfo: {}, //初始化是一个空对象
+
       spu: {
         category3Id: 0,
-        tmId: 0,
+        tmId: undefined,
         description: "",
         spuName: "",
         spuImageList: [],
         spuSaleAttrList: [
-          {
-            baseSaleAttrId: 0,
-            id: 0,
-            saleAttrName: "",
-            spuId: 0,
-            spuSaleAttrValueList: [
-              {
-                baseSaleAttrId: 0,
-                id: 0,
-                isChecked: "",
-                saleAttrName: "",
-                saleAttrValueName: "",
-                spuId: 0,
-              },
-            ],
-          },
         ],
       },
       tradeMarkList: [],
@@ -266,6 +251,21 @@ export default {
       }
       //获取所有销售属性，共三种
       let saleResult = await this.$API.spu.reqGetBaseSaleAttrList(spu.id);
+      if (saleResult.code == 200) {
+        this.baseSaleAttrList = saleResult.data;
+      }
+    },
+    //添加spu
+    async addSpuData(category3Id) {
+      //添加SPU的时候收集三级分类的id
+      this.spu.category3Id = category3Id;
+      //获取品牌的信息
+      let tradeMarkResult = await this.$API.spu.reqGetTradeMarkList();
+      if (tradeMarkResult.code == 200) {
+        this.tradeMarkList = tradeMarkResult.data;
+      }
+      //获取平台全部的销售属性
+      let saleResult = await this.$API.spu.reqGetBaseSaleAttrList();
       if (saleResult.code == 200) {
         this.baseSaleAttrList = saleResult.data;
       }
