@@ -31,15 +31,16 @@
             label="SPU描述"
             width="width"
           ></el-table-column>
-          <el-table-column prop="prop" label="操作" width="width">
+          <el-table-column  label="操作" width="width">
             <!-- 插槽实现按钮 -->
             <template slot-scope="{ row, $index }">
-              <!-- 占位，将来换成hint -->
+           
               <hint-button
                 type="success"
                 icon="el-icon-plus"
                 size="mini"
                 title="添加SKU"
+                @click="addSku(row)"
               ></hint-button>
               <hint-button
                 type="warning"
@@ -84,7 +85,7 @@
       <!-- 添加/修改spu -->
       <SpuForm v-show="scene == 1" @changeScene="changeScene" ref="spu" />
       <!-- 添加sku -->
-      <SkuForm v-show="scene == 2" />
+      <SkuForm v-show="scene == 2" @changeScene="changeScene" ref="sku" />
     </el-card>
   </div>
 </template>
@@ -175,7 +176,14 @@ export default {
       this.$refs.spu.initSpuForm(row);
       // console.log(this.$refs.spu);
     },
+    //添加sku
+    addSku(row) {
+      console.log(row);
+      this.scene = 2;
 
+      //调用sku组件的方法，发送请求
+      this.$refs.sku.getSkuData(this.category1Id,this.category2Id,row);
+    },
     //自定义事件
     changeScene({ scene, flag }) {
       //flag这个形参为了区分保存按钮是添加还是修改

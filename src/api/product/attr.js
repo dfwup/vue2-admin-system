@@ -11,7 +11,7 @@ export const reqGetCategory2List = (category1Id) => request({
 })
 //三级分类  GET /admin/product/getCategory3/{category2Id}   参数：category2Id
 export const reqGetCategory3List = (category2Id) => request({
-    url: `/admin/product/getCategory2/${category2Id}`,
+    url: `/admin/product/getCategory3/${category2Id}`,
     method: 'get'
 })
 

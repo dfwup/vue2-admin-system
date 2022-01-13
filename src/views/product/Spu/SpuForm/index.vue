@@ -5,9 +5,8 @@
         <el-input placeholder="SPU名称" v-model="spu.spuName"></el-input>
       </el-form-item>
       <el-form-item label="品牌">
-        <el-select v-model="spu.tmId"  placeholder="请选择品牌">
+        <el-select v-model="spu.tmId" placeholder="请选择品牌">
           <el-option
-           
             :label="tradeMark.tmName"
             :value="tradeMark.id"
             v-for="(tradeMark, index) in tradeMarkList"
@@ -135,12 +134,11 @@ export default {
 
       spu: {
         category3Id: 0,
-        tmId: undefined,
+        tmId: 0,
         description: "",
         spuName: "",
         spuImageList: [],
-        spuSaleAttrList: [
-        ],
+        spuSaleAttrList: [],
       },
       tradeMarkList: [],
       spuImageList: [],
@@ -223,6 +221,7 @@ export default {
     handleSuccess(response, file, fileList) {
       // console.log("上传成功", response, file, fileList);
       this.spuImageList = fileList;
+       
     },
     //初始化spuForm数据
     async initSpuForm(spu) {
@@ -239,14 +238,16 @@ export default {
         this.tradeMarkList = tmResult.data;
       }
       //获取spu图片
-      let imgResult = await this.$API.spu.reqGetSpuImageList(spu.id);
-      if (imgResult.code == 200) {
-        // this.spuImageList=imgResult.data
-        //处理返回的图片数据,file-list需要name和url属性才能显示
-        let listArr = imgResult.data;
+      let spuImageResult = await this.$API.spu.reqGetSpuImageList(spu.id);
+      if (spuImageResult.code == 200) {
+        let listArr = spuImageResult.data;
+        //由于照片墙显示图片的数据需要数组，数组里面的元素需要有name与url字段
+        //需要把服务器返回的数据进行修改
         listArr.forEach((item) => {
-          (item.name = item.imgName), (item.url = item.imgUrl);
+          item.name = item.imgName;
+          item.url = item.imgUrl;
         });
+        //把整理好的数据赋值给
         this.spuImageList = listArr;
       }
       //获取所有销售属性，共三种
@@ -280,8 +281,10 @@ export default {
           imageUrl: (item.response && item.response.data) || item.url,
         };
       });
+
       //发请求
       let result = await this.$API.spu.reqAddOrUpdateSpu(this.spu);
+      console.log(result);
       if (result.code == 200) {
         //提示
         this.$message({ type: "success", message: "保存成功" });

@@ -256,6 +256,7 @@ export default {
     deleteAttrValue(index) {
       //不需要发请求，保存时提交表单数据
       this.attrInfo.attrValueList.splice(index, 1);
+      
     },
     //添加属性或者修改属性的操作
     async addOrUpdateAttr() {

@@ -33,7 +33,6 @@ export const reqGetBaseSaleAttrList = () => request({
 
 //保存spu信息   POST /admin/product/saveSpuInfo     参数spuInfo
 //更新spu信息   POST /admin/product/updateSpuInfo   参数 spuId
-//整合成一个请求    参数    spuInfo
 //修改SPU||添加SPU：对于修改或者添加，携带给服务器参数大致一样的，唯一的区别就是携带的参数是否带id
 export const reqAddOrUpdateSpu = (spuInfo) => {
     //携带的参数带有id----修改spu
