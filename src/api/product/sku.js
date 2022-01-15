@@ -37,3 +37,19 @@ export const reqSkuList=(page,limit)=>request({
     url:`/admin/product/list/${page}/${limit}`,
     method:'get'
 })
+
+//上架  GET /admin/product/onSale/{skuId}   参数 skuId
+export const reqOnSale=(skuId)=>request({
+    url: `/admin/product/onSale/${skuId} `,
+    method:'get'
+})
+//下架  GET /admin/product/cancelSale/{skuId}    参数skuId
+export const reqCancelSale=(skuId)=>request({
+    url:`/admin/product/cancelSale/${skuId}`,
+    method:'get'
+})
+//显示sku详情   GET /admin/product/getSkuById/{skuId}   参数skuId
+export const reqGetSkuById=(skuId)=>request({
+    url:`/admin/product/getSkuById/${skuId}`,
+    method:'get'
+})
