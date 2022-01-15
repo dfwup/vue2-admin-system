@@ -31,10 +31,9 @@
             label="SPU描述"
             width="width"
           ></el-table-column>
-          <el-table-column  label="操作" width="width">
+          <el-table-column label="操作" width="width">
             <!-- 插槽实现按钮 -->
             <template slot-scope="{ row, $index }">
-           
               <hint-button
                 type="success"
                 icon="el-icon-plus"
@@ -54,6 +53,7 @@
                 icon="el-icon-info"
                 size="mini"
                 title="查看当前SPU的全部SKU列表"
+                @click="handleSkuList(row)"
               ></hint-button>
               <hint-button
                 type="danger"
@@ -86,6 +86,27 @@
       <SpuForm v-show="scene == 1" @changeScene="changeScene" ref="spu" />
       <!-- 添加sku -->
       <SkuForm v-show="scene == 2" @changeScene="changeScene" ref="sku" />
+      <!-- 显示sku列表 -->
+      <el-dialog title="收货地址" :visible.sync="dialogTableVisible" :before-close="close">
+        <el-table :data="skuList" border  v-loading="loading">
+          <el-table-column
+            property="skuName"
+            label="名称"
+            width="150"
+          ></el-table-column>
+          <el-table-column
+            property="price"
+            label="价格"
+            width="200"
+          ></el-table-column>
+          <el-table-column property="weight" label="重量"></el-table-column>
+          <el-table-column label="默认图片">
+            <template slot-scope="{row,$index}">
+            <img :src="row.skuDefaultImg" alt="" style="width:100px;height:100px">
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -110,6 +131,32 @@ export default {
       records: [], //存储spu列表
       total: 0, //数据个数
       scene: 0, //0展示spu  1添加/修改spu   2添加sku   data中的响应式数据
+      dialogTableVisible: false,
+      spu: {},
+      skuList: [],
+      loading:true,
+      gridData: [
+        {
+          date: "2016-05-02",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄",
+        },
+        {
+          date: "2016-05-04",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄",
+        },
+        {
+          date: "2016-05-01",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄",
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄",
+        },
+      ],
     };
   },
   methods: {
@@ -150,7 +197,7 @@ export default {
     // },
     //修改每页展示数据个数
     handleSizeChange(limit) {
-      console.log(limit);
+      // console.log(limit);
       this.limit = limit;
       this.getSpuList();
     },
@@ -178,11 +225,32 @@ export default {
     },
     //添加sku
     addSku(row) {
-      console.log(row);
+      // console.log(row);
       this.scene = 2;
-
       //调用sku组件的方法，发送请求
-      this.$refs.sku.getSkuData(this.category1Id,this.category2Id,row);
+      this.$refs.sku.getSkuData(this.category1Id, this.category2Id, row);
+    },
+    //显示sku列表
+    async handleSkuList(spu) {
+      //显示
+      this.dialogTableVisible = true;
+      this.spu = spu;
+      //发请求
+      let result = await this.$API.sku.reqGetSkuList(spu.id);
+      if (result.code==200) {
+        this.skuList=result.data
+        this.loading=false
+      }
+      
+    },
+    //关闭dialog
+    close(done){
+       //loading属性再次变为真
+      this.loading = true;
+      //清除sku列表的数据
+      this.skuList = [];
+      //管理对话框
+      done();
     },
     //自定义事件
     changeScene({ scene, flag }) {

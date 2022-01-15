@@ -20,3 +20,14 @@ export const reqGetAttrInfoList=(category1Id,category2Id,category3Id)=>request({
     url:`/admin/product/attrInfoList/${category1Id}/${category2Id}/${category3Id}`,
     method:'get'
 })
+//添加sku   POST /admin/product/saveSkuInfo  参数skuInfo
+export const reqAddSku=(skuInfo)=>request({
+    url:'/admin/product/saveSkuInfo',
+    method:'post',
+    data:skuInfo
+})
+//根据spuId获取sku列表  GET /admin/product/findBySpuId/{spuId}  参数spuId
+export const reqGetSkuList=(spuId)=>request({
+    url:`/admin/product/findBySpuId/${spuId}`,
+    method:'get'
+})

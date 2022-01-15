@@ -221,7 +221,6 @@ export default {
     handleSuccess(response, file, fileList) {
       // console.log("上传成功", response, file, fileList);
       this.spuImageList = fileList;
-       
     },
     //初始化spuForm数据
     async initSpuForm(spu) {
@@ -281,10 +280,9 @@ export default {
           imageUrl: (item.response && item.response.data) || item.url,
         };
       });
-
       //发请求
       let result = await this.$API.spu.reqAddOrUpdateSpu(this.spu);
-      console.log(result);
+      // console.log(result);
       if (result.code == 200) {
         //提示
         this.$message({ type: "success", message: "保存成功" });

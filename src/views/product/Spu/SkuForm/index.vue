@@ -29,7 +29,7 @@
         <el-form :inline="true" ref="form" label-width="80px">
           <el-form-item
             :label="attr.attrName"
-            v-for="(attr, index) in skuAttrInfoList"
+            v-for="(attr, index) in spuAttrInfoList"
             :key="attr.id"
           >
             <el-select placeholder="请选择" v-model="attr.attrIdAndValueId">
@@ -47,7 +47,7 @@
         <el-form :inline="true" ref="form" label-width="80px">
           <el-form-item
             :label="saleAttr.saleAttrName"
-            v-for="(saleAttr, index) in skuSaleAttrList"
+            v-for="(saleAttr, index) in spuSaleAttrList"
             :key="saleAttr.id"
           >
             <el-select placeholder="请选择" v-model="saleAttr.attrIdAndValueId">
@@ -62,9 +62,14 @@
         </el-form>
       </el-form-item>
       <el-form-item label="图片列表">
-        <el-table style="width: 100%" :data="skuImageList">
+        <el-table
+          style="width: 100%"
+          :data="spuImageList"
+          @selection-change="handleSelectionChange"
+        >
           <el-table-column type="selection" width="55"> </el-table-column>
           <el-table-column prop="prop" label="图片" width="width">
+            <!-- 作用域插槽 -->
             <template slot-scope="{ row, $index }">
               <img :src="row.imgUrl" style="width: 100px; height: 100px" />
             </template>
@@ -88,8 +93,8 @@
         </el-table>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary">保存</el-button>
-        <el-button>取消</el-button>
+        <el-button type="primary" @click="saveSkuForm">保存</el-button>
+        <el-button @click="cancel">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -100,7 +105,6 @@ export default {
   name: "SkuForm",
   data() {
     return {
-      attrIdAndAttrName: "",
       spu: {},
       skuInfo: {
         //第一类收集的数据：父组件给的数据
@@ -122,9 +126,12 @@ export default {
         //销售属性
         skuSaleAttrValueList: [],
       },
-      skuImageList: [],
-      skuSaleAttrList: [],
-      skuAttrInfoList: [],
+
+      spuImageList: [],
+      spuSaleAttrList: [],
+      spuAttrInfoList: [],
+      //收集选中的图片,缺少isDefault
+      imageList: [],
     };
   },
   methods: {
@@ -135,19 +142,19 @@ export default {
       this.skuInfo.spuId = spu.id;
       this.skuInfo.tmId = spu.tmId;
       this.spu = spu;
-      //获取图片的数据
+      //获取图片的数据,加上isDefault
       let result = await this.$API.sku.reqGetSpuImageList(spu.id);
       if (result.code == 200) {
         let list = result.data;
         list.forEach((item) => {
           item.isDefault = 0;
         });
-        this.skuImageList = list;
+        this.spuImageList = list;
       }
       //获取销售属性的数据
       let result1 = await this.$API.sku.reqGetSpuSaleAttrList(spu.id);
       if (result1.code == 200) {
-        this.skuSaleAttrList = result1.data;
+        this.spuSaleAttrList = result1.data;
       }
       //获取平台属性的数据
       let result2 = await this.$API.sku.reqGetAttrInfoList(
@@ -156,10 +163,15 @@ export default {
         spu.category3Id
       );
       if (result2.code == 200) {
-        this.skuAttrInfoList = result2.data;
+        this.spuAttrInfoList = result2.data;
       }
     },
-    //排他操作
+    //勾选
+    handleSelectionChange(params) {
+      //获取用户选中图片的信息
+      this.imageList = params;
+    },
+    //切换按钮 排他操作
     changeDefault(row) {
       //图片列表的数据的isDefault字段变为 0
       this.spuImageList.forEach((item) => {
@@ -169,6 +181,53 @@ export default {
       row.isDefault = 1;
       //收集默认图片的地址
       this.skuInfo.skuDefaultImg = row.imgUrl;
+    },
+    //保存
+ async saveSkuForm(){
+      //整理参数
+      //整理平台属性
+      const {spuAttrInfoList,skuInfo,spuSaleAttrList,imageList} = this;
+      //整理平台属的数据
+     skuInfo.skuAttrValueList = spuAttrInfoList.reduce((prev,item)=>{
+         if(item.attrIdAndValueId){
+           const [attrId,valueId]  = item.attrIdAndValueId.split(":");
+            prev.push({attrId,valueId});
+         }
+         return prev;
+      },[]);
+      //整理销售属性
+     skuInfo.skuSaleAttrValueList = spuSaleAttrList.reduce((prev,item)=>{
+         if(item.attrIdAndValueId){
+           const [saleAttrId,saleAttrValueId] = item.attrIdAndValueId.split(':');
+           prev.push({saleAttrId,saleAttrValueId});
+         }
+         return prev;
+      },[]);
+     //整理图片的数据
+     skuInfo.skuImageList = imageList.map(item=>{
+         return {
+           imgName:item.imgName,
+           imgUrl:item.imgUrl,
+           isDefault:item.isDefault,
+           spuImgId:item.id,
+         }
+     });
+     //发请求
+     let result  = await this.$API.sku.reqAddSku(skuInfo);
+     if(result.code==200){
+        this.$message({type:'success',message:'添加SKU成功'})
+        this.$emit('changeScene',{ scene: 0, flag: "" });
+     }
+    },
+    //取消
+    cancel() {
+      //取消按钮的回调，通知父亲切换场景为0
+      this.$emit("changeScene", { scene: 0, flag: "" });
+      //清理数据
+      //Object.assign:es6中新增的方法可以合并对象
+      //组件实例this._data,可以操作data当中响应式数据
+      //this.$options可以获取配置对象，配置对象的data函数执行，返回的响应式数据为空的
+      Object.assign(this._data, this.$options.data());
     },
   },
 };
